@@ -72,7 +72,6 @@
             margin-top: 20px;
         }
 
-        /* 空き枠（スロット）の設定 */
         .slot {
             height: 84px;
             width: 100%;
@@ -274,10 +273,13 @@
                 score += 10;
                 document.getElementById('score-display').textContent = `スコア: ${score}`;
                 l.classList.add('fade-out'); r.classList.add('fade-out');
+                
+                // --- 修正箇所：1.2秒待ってから「枠が空の状態」で補充を判断する ---
                 setTimeout(() => {
                     l.remove(); r.remove();
-                    replenish();
-                }, 1500);
+                    // さらに0.1秒だけ待ってから補充することで、確実に空き地を計算させる
+                    setTimeout(() => replenish(), 100);
+                }, 1200);
             } else {
                 l.classList.add('error'); r.classList.add('error');
                 setTimeout(() => { l.classList.remove('error', 'selected'); r.classList.remove('error', 'selected'); }, 500);
@@ -287,10 +289,12 @@
         function replenish() {
             const nextEl = currentPool[Math.floor(Math.random() * currentPool.length)];
             const lSlots = []; const rSlots = [];
+            
             for(let i=0; i<5; i++) {
                 if(!document.getElementById(`l-slot-${i}`).hasChildNodes()) lSlots.push(i);
                 if(!document.getElementById(`r-slot-${i}`).hasChildNodes()) rSlots.push(i);
             }
+
             if(lSlots.length > 0) {
                 const targetL = lSlots[Math.floor(Math.random() * lSlots.length)];
                 document.getElementById(`l-slot-${targetL}`).appendChild(createBtn(nextEl.n, nextEl.m, 'left'));
