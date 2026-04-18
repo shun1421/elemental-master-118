@@ -15,7 +15,7 @@
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Helvetica Neue'， Arial， sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
@@ -26,7 +26,7 @@
             touch-action: manipulation;
         }
 
-        #home-screen, #confirm-screen, #game-screen, #result-screen {
+        #home-screen， #confirm-screen， #game-screen， #result-screen {
             display: none;
             width: 100%;
             max-width: 500px;
@@ -35,7 +35,6 @@
             text-align: center;
         }
 
-        /* 初期表示 */
         #home-screen { display: block; }
 
         .btn {
@@ -52,8 +51,8 @@
             width: 90%;
             display: block;
             outline: none;
-            text-decoration: none;
             color: var(--text-color);
+            text-decoration: none;
         }
 
         .btn:active { transform: translateY(2px); border-bottom-width: 2px; }
@@ -66,11 +65,26 @@
             width: 100%; height: 100%; background: var(--primary-color); border-radius: 8px; transition: width 0.1s linear;
         }
 
-        .game-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        /* ゲームグリッドの設定 */
+        .game-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* ボタンが入るための固定枠（高さ固定） */
+        .slot {
+            height: 84px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         .match-btn {
             height: 80px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
-            transition: opacity 0.3s, transform 0.3s, background 0.2s; width: 100%; margin: 0;
+            transition: opacity 0.3s， transform 0.3s， background 0.2s; width: 100%; margin: 0;
             background: white; border: 2px solid var(--btn-border); border-bottom: 4px solid var(--btn-border); border-radius: 12px; font-weight: bold; cursor: pointer;
         }
 
@@ -79,25 +93,22 @@
         .match-btn.error { animation: shake 0.3s; background: #ffdbdb; border-color: var(--error-color); color: var(--error-color); pointer-events: none; }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
+            0%， 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
 
         .ranking-container {
-            max-height: 450px; overflow-y: auto; margin: 20px 0; border: 1px solid #eee; border-radius: 12px; background: white;
+            max-height: 400px; overflow-y: auto; margin: 20px 0; border: 1px solid #eee; border-radius: 12px; background: white;
         }
-        .ranking-table {
-            width: 100%; border-collapse: collapse;
-        }
-        .ranking-table th, .ranking-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; text-align: center; }
+        .ranking-table { width: 100%; border-collapse: collapse; }
+        .ranking-table th， .ranking-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; text-align: center; }
         .ranking-table th { background: #f9f9f9; color: var(--secondary-color); position: sticky; top: 0; }
 
         .input-group { background: white; padding: 20px; border-radius: 12px; border: 2px solid var(--primary-color); margin: 20px 0; }
         .input-group input { width: 80%; padding: 10px; margin: 5px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
 
         h1 { color: var(--primary-color); }
-        h2 { color: var(--secondary-color); margin-top: 0; }
     </style>
 </head>
 <body>
@@ -113,9 +124,7 @@
 
     <div id="confirm-screen">
         <h2 id="confirm-title">ランキング</h2>
-        <div id="confirm-ranking-display" class="ranking-container">
-            <p>読み込み中...</p>
-        </div>
+        <div id="confirm-ranking-display" class="ranking-container"></div>
         <button id="start-btn" class="btn" style="background: var(--primary-color); color: white; border:none;">ゲーム開始！</button>
         <button class="btn" onclick="location.reload()">戻る</button>
     </div>
@@ -124,37 +133,34 @@
         <div class="progress-container"><div id="progress-bar"></div></div>
         <div id="score-display" style="font-size: 20px; font-weight: bold;">スコア: 0</div>
         <div class="game-grid">
-            <div id="left-column"></div>
-            <div id="right-column"></div>
+            <div id="left-col-container"></div>
+            <div id="right-col-container"></div>
         </div>
     </div>
 
     <div id="result-screen">
         <h2>タイムアップ！</h2>
         <div id="final-score" style="font-size: 32px; font-weight: bold; color: var(--primary-color);">0 点</div>
-
         <div id="registration-area" class="input-group">
             <h3>ランキングに登録</h3>
-            <p style="font-size: 12px; color: #888;">上位20位以内に入ると確認画面に表示されます。</p>
             <input type="text" id="school-name" placeholder="高校名">
             <input type="text" id="nickname" placeholder="ニックネーム">
             <button class="btn" onclick="handleRegistration()" style="background: var(--primary-color); color: white; border:none;">スコアを送信</button>
         </div>
-
         <button class="btn" onclick="location.reload()">ホームへ戻る</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore， collection， addDoc， query， orderBy， limit， getDocs， where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyDLK0eDVAMdb-pMu3j0CphI_GQSCWN-E_U",
-            authDomain: "element-master-118.firebaseapp.com",
-            projectId: "element-master-118",
-            storageBucket: "element-master-118.firebasestorage.app",
-            messagingSenderId: "487005219905",
-            appId: "1:487005219905:web:61da7b9e737cc1137daac0",
+            apiKey: "AIzaSyDLK0eDVAMdb-pMu3j0CphI_GQSCWN-E_U"，
+            authDomain: "element-master-118.firebaseapp.com"，
+            projectId: "element-master-118"，
+            storageBucket: "element-master-118.firebasestorage.app"，
+            messagingSenderId: "487005219905"，
+            appId: "1:487005219905:web:61da7b9e737cc1137daac0"，
             measurementId: "G-PQHX6S6PMJ"
         };
 
@@ -175,62 +181,31 @@
         let selectedRight = null;
         let currentLevel = 1;
 
-        // 全画面非表示
-        function hideAllScreens() {
-            document.getElementById('home-screen').style.display = 'none';
-            document.getElementById('confirm-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('result-screen').style.display = 'none';
-        }
-
-        // ランキング取得関数
-        async function fetchRanking(level, targetId, limitNum) {
+        async function fetchRanking(level， targetId， limitNum) {
             const display = document.getElementById(targetId);
             display.innerHTML = "<p>読み込み中...</p>";
-            
-            const q = query(
-                collection(db, "match_rankings"),
-                where("level", "==", level),
-                orderBy("score", "desc"),
-                limit(limitNum)
-            );
-
+            const q = query(collection(db， "match_rankings")， where("level"， "=="， level)， orderBy("score"， "desc")， limit(limitNum));
             try {
                 const snap = await getDocs(q);
                 let html = `<table class="ranking-table"><tr><th>位</th><th>高校</th><th>名</th><th>点</th></tr>`;
                 let rank = 1;
-                if (snap.empty) {
-                    html += `<tr><td colspan="4">記録がまだありません</td></tr>`;
-                } else {
-                    snap.forEach(doc => {
-                        const d = doc.data();
-                        html += `<tr><td>${rank}</td><td>${d.school}</td><td>${d.nickname}</td><td>${d.score}</td></tr>`;
-                        rank++;
-                    });
-                }
+                if (snap.empty) { html += `<tr><td colspan="4">記録なし</td></tr>`; } 
+                else { snap.forEach(doc => { const d = doc.data(); html += `<tr><td>${rank}</td><td>${d.school}</td><td>${d.nickname}</td><td>${d.score}</td></tr>`; rank++; }); }
                 display.innerHTML = html + "</table>";
-            } catch (e) {
-                console.error(e);
-                display.innerHTML = "<p>エラーが発生しました。</p>";
-            }
+            } catch (e) { display.innerHTML = "<p>エラー</p>"; }
         }
 
-        // 確認画面を表示
         window.showConfirm = (level) => {
             currentLevel = level;
-            hideAllScreens();
+            document.getElementById('home-screen').style.display = 'none';
             document.getElementById('confirm-screen').style.display = 'block';
             document.getElementById('confirm-title').textContent = `Lv.${level} TOP 20`;
-            
-            fetchRanking(level, 'confirm-ranking-display', 20);
+            fetchRanking(level， 'confirm-ranking-display'， 20);
 
-            // スタートボタンにイベントを登録
             document.getElementById('start-btn').onclick = () => {
-                hideAllScreens();
+                document.getElementById('confirm-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'block';
                 currentPool = allElements.filter(el => el.l <= level);
-                score = 0;
-                document.getElementById('score-display').textContent = `スコア: 0`;
                 initGrid();
                 startTimer();
             };
@@ -241,27 +216,41 @@
             if(timer) clearInterval(timer);
             timer = setInterval(() => {
                 timeLeft -= 0.1;
-                document.getElementById('progress-bar').style.width = Math.max(0, (timeLeft / 40 * 100)) + '%';
+                document.getElementById('progress-bar').style.width = Math.max(0， (timeLeft / 40 * 100)) + '%';
                 if (timeLeft <= 0) endGame();
-            }, 100);
+            }， 100);
         }
 
         function initGrid() {
-            const leftCol = document.getElementById('left-column');
-            const rightCol = document.getElementById('right-column');
-            leftCol.innerHTML = ''; rightCol.innerHTML = '';
-            const set = [...currentPool].sort(() => 0.5 - Math.random()).slice(0, 5);
-            const names = set.map(e => ({id:e.n, text:e.m})).sort(() => 0.5 - Math.random());
-            const symbols = set.map(e => ({id:e.n, text:e.s})).sort(() => 0.5 - Math.random());
-            names.forEach(item => leftCol.appendChild(createBtn(item, 'left')));
-            symbols.forEach(item => rightCol.appendChild(createBtn(item, 'right')));
+            score = 0;
+            document.getElementById('score-display').textContent = `スコア: 0`;
+            const lContainer = document.getElementById('left-col-container');
+            const rContainer = document.getElementById('right-col-container');
+            lContainer.innerHTML = ''; rContainer.innerHTML = '';
+
+            // 5つのスロットを作成
+            for(let i=0; i<5; i++) {
+                const ls = document.createElement('div'); ls.className = 'slot'; ls.id = `l-slot-${i}`;
+                const rs = document.createElement('div'); rs.className = 'slot'; rs.id = `r-slot-${i}`;
+                lContainer.appendChild(ls); rContainer.appendChild(rs);
+            }
+
+            // 初期5ペアを配置
+            const initialSet = [...currentPool].sort(() => 0.5 - Math.random()).slice(0, 5);
+            const lIndices = [0,1,2,3,4].sort(() => 0.5 - Math.random());
+            const rIndices = [0,1,2,3,4].sort(() => 0.5 - Math.random());
+
+            initialSet.forEach((el, idx) => {
+                document.getElementById(`l-slot-${lIndices[idx]}`).appendChild(createBtn(el.n, el.m, 'left'));
+                document.getElementById(`r-slot-${rIndices[idx]}`).appendChild(createBtn(el.n, el.s, 'right'));
+            });
         }
 
-        function createBtn(item, side) {
+        function createBtn(id, text, side) {
             const b = document.createElement('button');
             b.className = 'match-btn';
-            b.textContent = item.text;
-            b.dataset.id = item.id;
+            b.textContent = text;
+            b.dataset.id = id;
             b.onclick = () => handleSelect(b, side);
             return b;
         }
@@ -282,46 +271,60 @@
         function checkMatch() {
             const l = selectedLeft; const r = selectedRight;
             selectedLeft = null; selectedRight = null;
+
             if (l.dataset.id === r.dataset.id) {
                 score += 10;
                 document.getElementById('score-display').textContent = `スコア: ${score}`;
                 l.classList.add('fade-out'); r.classList.add('fade-out');
-                setTimeout(() => replaceButtons(l, r), 1500);
+                // 1.5秒後に完全に削除して、ランダムな空き地に補充
+                setTimeout(() => {
+                    l.remove(); r.remove();
+                    replenish();
+                }, 1500);
             } else {
                 l.classList.add('error'); r.classList.add('error');
-                setTimeout(() => { 
-                    l.classList.remove('error', 'selected'); 
-                    r.classList.remove('error', 'selected'); 
-                }, 500);
+                setTimeout(() => { l.classList.remove('error', 'selected'); r.classList.remove('error', 'selected'); }, 500);
             }
         }
 
-        function replaceButtons(l, r) {
-            const newEl = currentPool[Math.floor(Math.random() * currentPool.length)];
-            l.textContent = newEl.m; l.dataset.id = newEl.n;
-            r.textContent = newEl.s; r.dataset.id = newEl.n;
-            l.classList.remove('fade-out', 'selected'); r.classList.remove('fade-out', 'selected');
+        function replenish() {
+            // 新しい元素を選択
+            const nextEl = currentPool[Math.floor(Math.random() * currentPool.length)];
+            
+            // 空いているスロットを探す
+            const lSlots = []; const rSlots = [];
+            for(let i=0; i<5; i++) {
+                if(!document.getElementById(`l-slot-${i}`).hasChildNodes()) lSlots.push(i);
+                if(!document.getElementById(`r-slot-${i}`).hasChildNodes()) rSlots.push(i);
+            }
+
+            // ランダムな空きスロットに配置
+            if(lSlots.length > 0) {
+                const targetL = lSlots[Math.floor(Math.random() * lSlots.length)];
+                document.getElementById(`l-slot-${targetL}`).appendChild(createBtn(nextEl.n, nextEl.m, 'left'));
+            }
+            if(rSlots.length > 0) {
+                const targetR = rSlots[Math.floor(Math.random() * rSlots.length)];
+                document.getElementById(`r-slot-${targetR}`).appendChild(createBtn(nextEl.n, nextEl.s, 'right'));
+            }
         }
 
         function endGame() {
             if(timer) clearInterval(timer);
-            hideAllScreens();
+            document.getElementById('game-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'block';
             document.getElementById('final-score').textContent = `${score} 点`;
-            document.getElementById('registration-area').style.display = 'block';
         }
 
         window.handleRegistration = async () => {
             const school = document.getElementById('school-name').value;
             const nickname = document.getElementById('nickname').value;
-            if (!school || !nickname) return alert("高校名とニックネームを入力してください");
+            if (!school || !nickname) return alert("入力してください");
             try {
-                await addDoc(collection(db, "match_rankings"), {
-                    school, nickname, score, level: currentLevel, date: new Date()
-                });
+                await addDoc(collection(db， "match_rankings")， { school， nickname， score， level: currentLevel， date: new Date() });
                 alert("登録完了！");
                 document.getElementById('registration-area').style.display = 'none';
-            } catch (e) { alert("エラーが発生しました。"); }
+            } catch (e) { alert("エラー"); }
         };
     </script>
 </body>
