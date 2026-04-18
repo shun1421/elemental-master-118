@@ -35,7 +35,6 @@
             text-align: center;
         }
 
-        /* 初期表示設定 */
         #home-screen { display: block; }
 
         .periodic-wrapper {
@@ -147,7 +146,6 @@
     </div>
 
     <script>
-        // 全118元素の座標・レベルデータ
         const rawData = [
             "H,1,1,1,1","He,2,18,1,1","Li,3,1,2,1","Be,4,2,2,1","B,5,13,2,1","C,6,14,2,1","N,7,15,2,1","O,8,16,2,1","F,9,17,2,1","Ne,10,18,2,1",
             "Na,11,1,3,1","Mg,12,2,3,1","Al,13,13,3,1","Si,14,14,3,1","P,15,15,3,1","S,16,16,3,1","Cl,17,17,3,1","Ar,18,18,3,1",
@@ -184,21 +182,16 @@
         function createTableStructure(containerId) {
             const grid = document.getElementById(containerId);
             grid.innerHTML = '';
-            // 族番号ラベル
             grid.appendChild(createDiv('label', ''));
             for (let c = 1; c <= 18; c++) grid.appendChild(createDiv('label', c));
 
-            // メイン周期表
             for (let r = 1; r <= 7; r++) {
                 grid.appendChild(createDiv('label', r));
                 for (let c = 1; c <= 18; c++) grid.appendChild(createCell(containerId, c, r));
             }
-            // 下部スペーサー
-            const sp = document.createElement('div');
-            sp.className = 'cell spacer';
+            const sp = document.createElement('div'); sp.className = 'cell spacer';
             grid.appendChild(sp);
 
-            // ランタノイド・アクチノイド
             const labels = ["*", "**"];
             for (let r = 9; r <= 10; r++) {
                 grid.appendChild(createDiv('label', labels[r-9]));
@@ -226,10 +219,8 @@
             questionIndex++;
             if (questionIndex > 10) return showResult();
             document.getElementById('question-counter').textContent = `第 ${questionIndex} / 10 問`;
-            
             targetEl = currentPool[Math.floor(Math.random() * currentPool.length)];
             
-            // クリーンアップ
             document.querySelectorAll('.cell').forEach(c => {
                 if(!c.classList.contains('empty') && !c.classList.contains('spacer')) {
                     c.className = 'cell'; c.textContent = '';
@@ -251,9 +242,7 @@
             }
             choices.sort(() => 0.5 - Math.random()).forEach(el => {
                 const b = document.createElement('button');
-                b.className = 'btn';
-                b.style.width = 'auto';
-                b.style.minWidth = '80px';
+                b.className = 'btn'; b.style.width = 'auto'; b.style.minWidth = '80px';
                 b.textContent = el.s;
                 b.onclick = () => checkAnswer(el, b);
                 container.appendChild(b);
@@ -263,21 +252,14 @@
         function checkAnswer(selected, btn) {
             document.querySelectorAll('#choices .btn').forEach(b => b.style.pointerEvents = 'none');
             const cell = document.getElementById(`table-grid-${targetEl.c}-${targetEl.r}`);
-            
             if (selected.n === targetEl.n) {
-                btn.style.background = 'var(--primary-color)';
-                btn.style.color = 'white';
-                correctCount++;
-                solvedElements.push(targetEl);
+                btn.style.background = 'var(--primary-color)'; btn.style.color = 'white';
+                correctCount++; solvedElements.push(targetEl);
             } else {
-                btn.style.background = 'var(--error-color)';
-                btn.style.color = 'white';
+                btn.style.background = 'var(--error-color)'; btn.style.color = 'white';
             }
-            
             if(cell) {
-                cell.textContent = targetEl.s;
-                cell.classList.remove('target');
-                cell.classList.add('correct-fill');
+                cell.textContent = targetEl.s; cell.classList.remove('target'); cell.classList.add('correct-fill');
             }
             setTimeout(nextQuestion, 1500);
         }
@@ -288,10 +270,7 @@
             createTableStructure('result-table-grid');
             solvedElements.forEach(el => {
                 const cell = document.getElementById(`result-table-grid-${el.c}-${el.r}`);
-                if(cell) {
-                    cell.textContent = el.s;
-                    cell.classList.add('correct-fill');
-                }
+                if(cell) { cell.textContent = el.s; cell.classList.add('correct-fill'); }
             });
             document.getElementById('final-stats').textContent = `10問中 ${correctCount} 問正解！`;
         }
