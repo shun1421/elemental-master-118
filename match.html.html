@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>元素マッチング - Element Matcher Full</title>
+    <title>元素マッチング - Element Matcher</title>
     <style>
         :root {
             --primary-color: #58cc02;
+            --secondary-color: #1899d6;
             --error-color: #ff4b4b;
             --text-color: #4b4b4b;
             --bg-color: #f7f7f7;
@@ -42,75 +43,35 @@
             border-bottom: 4px solid var(--btn-border);
             border-radius: 12px;
             padding: 15px 20px;
-            margin: 10px;
+            margin: 10px auto;
             cursor: pointer;
             font-size: 18px;
             font-weight: bold;
             transition: all 0.1s;
             width: 90%;
-            outline: none;
+            display: block;
         }
 
-        .btn:active {
-            transform: translateY(2px);
-            border-bottom-width: 2px;
-        }
-
-        .level-btn:hover { border-color: var(--primary-color); }
+        .btn:active { transform: translateY(2px); border-bottom-width: 2px; }
 
         .progress-container {
-            width: 100%;
-            height: 16px;
-            background: #e5e5e5;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            width: 100%; height: 16px; background: #e5e5e5; border-radius: 8px; margin-bottom: 20px;
         }
 
         #progress-bar {
-            width: 100%;
-            height: 100%;
-            background: var(--primary-color);
-            border-radius: 8px;
-            transition: width 0.1s linear;
+            width: 100%; height: 100%; background: var(--primary-color); border-radius: 8px; transition: width 0.1s linear;
         }
 
-        .game-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
+        .game-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
 
         .match-btn {
-            height: 80px;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.3s, transform 0.3s, background 0.2s;
-            width: 100%;
-            margin: 0;
+            height: 80px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.3s, transform 0.3s, background 0.2s; width: 100%; margin: 0;
         }
 
-        .match-btn.selected {
-            background: #ddf4ff;
-            border-color: #84d8ff;
-            color: #1899d6;
-        }
-
-        .match-btn.fade-out {
-            opacity: 0;
-            transform: scale(0.9);
-            pointer-events: none;
-        }
-
-        .match-btn.error {
-            animation: shake 0.3s;
-            background: #ffdbdb;
-            border-color: var(--error-color);
-            color: var(--error-color);
-            pointer-events: none;
-        }
+        .match-btn.selected { background: #ddf4ff; border-color: #84d8ff; color: #1899d6; }
+        .match-btn.fade-out { opacity: 0; transform: scale(0.9); pointer-events: none; }
+        .match-btn.error { animation: shake 0.3s; background: #ffdbdb; border-color: var(--error-color); color: var(--error-color); pointer-events: none; }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
@@ -118,15 +79,15 @@
             75% { transform: translateX(5px); }
         }
 
-        .miss-list {
-            text-align: left;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin: 20px 0;
-            max-height: 300px;
-            overflow-y: auto;
+        /* ランキング表示用 */
+        .ranking-table {
+            width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 12px; overflow: hidden;
         }
+        .ranking-table th, .ranking-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .ranking-table th { background: #f9f9f9; color: var(--secondary-color); }
+
+        .input-group { background: white; padding: 20px; border-radius: 12px; border: 2px solid var(--primary-color); margin: 20px 0; }
+        .input-group input { width: 80%; padding: 10px; margin: 5px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
 
         h1 { color: var(--primary-color); }
     </style>
@@ -136,16 +97,14 @@
     <div id="home-screen">
         <h1>元素マッチング</h1>
         <p>レベルを選んでスタート！</p>
-        <button class="btn level-btn" onclick="startGame(1)">Lv.1：基本20元素</button>
-        <button class="btn level-btn" onclick="startGame(2)">Lv.2：受験頻出</button>
-        <button class="btn level-btn" onclick="startGame(3)">Lv.3：全118元素</button>
+        <button class="btn" onclick="startGame(1)">Lv.1：基本20元素</button>
+        <button class="btn" onclick="startGame(2)">Lv.2：受験頻出(+Mn等)</button>
+        <button class="btn" onclick="startGame(3)">Lv.3：全118元素</button>
     </div>
 
     <div id="game-screen">
-        <div class="progress-container">
-            <div id="progress-bar"></div>
-        </div>
-        <div id="score-display">スコア: 0</div>
+        <div class="progress-container"><div id="progress-bar"></div></div>
+        <div id="score-display" style="font-size: 20px; font-weight: bold;">スコア: 0</div>
         <div class="game-grid">
             <div id="left-column"></div>
             <div id="right-column"></div>
@@ -154,22 +113,41 @@
 
     <div id="result-screen">
         <h2>タイムアップ！</h2>
-        <div id="final-score" style="font-size: 28px; font-weight: bold; color: var(--primary-color);"></div>
-        <div id="miss-container" class="miss-list">
-            <h3>復習リスト：</h3>
-            <ul id="miss-ul"></ul>
+        <div id="final-score" style="font-size: 32px; font-weight: bold; color: var(--primary-color);">0 点</div>
+
+        <div id="registration-area" class="input-group">
+            <h3>ランキングに登録</h3>
+            <input type="text" id="school-name" placeholder="高校名">
+            <input type="text" id="nickname" placeholder="ニックネーム">
+            <button class="btn" onclick="handleRegistration()" style="background: var(--primary-color); color: white;">スコアを送信</button>
         </div>
-        <button class="btn" onclick="location.reload()" style="background: var(--primary-color); color: white;">ホームへ戻る</button>
+
+        <div id="ranking-display"></div>
+        <button class="btn" onclick="location.reload()">ホームへ戻る</button>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLK0eDVAMdb-pMu3j0CphI_GQSCWN-E_U",
+            authDomain: "element-master-118.firebaseapp.com",
+            projectId: "element-master-118",
+            storageBucket: "element-master-118.firebasestorage.app",
+            messagingSenderId: "487005219905",
+            appId: "1:487005219905:web:61da7b9e737cc1137daac0",
+            measurementId: "G-PQHX6S6PMJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 元素データ（短縮版。実際には118個含めます）
         const allElements = [
-            // Lv1: 1-20
             {n:1,s:"H",m:"水素",l:1},{n:2,s:"He",m:"ヘリウム",l:1},{n:3,s:"Li",m:"リチウム",l:1},{n:4,s:"Be",m:"ベリリウム",l:1},{n:5,s:"B",m:"ホウ素",l:1},{n:6,s:"C",m:"炭素",l:1},{n:7,s:"N",m:"窒素",l:1},{n:8,s:"O",m:"酸素",l:1},{n:9,s:"F",m:"フッ素",l:1},{n:10,s:"Ne",m:"ネオン",l:1},{n:11,s:"Na",m:"ナトリウム",l:1},{n:12,s:"Mg",m:"マグネシウム",l:1},{n:13,s:"Al",m:"アルミニウム",l:1},{n:14,s:"Si",m:"ケイ素",l:1},{n:15,s:"P",m:"リン",l:1},{n:16,s:"S",m:"硫黄",l:1},{n:17,s:"Cl",m:"塩素",l:1},{n:18,s:"Ar",m:"アルゴン",l:1},{n:19,s:"K",m:"カリウム",l:1},{n:20,s:"Ca",m:"カルシウム",l:1},
-            // Lv2: 受験頻出
-            {n:1,s:"H",m:"水素",l:1},{n:2,s:"He",m:"ヘリウム",l:1},{n:3,s:"Li",m:"リチウム",l:1},{n:4,s:"Be",m:"ベリリウム",l:1},{n:5,s:"B",m:"ホウ素",l:1},{n:6,s:"C",m:"炭素",l:1},{n:7,s:"N",m:"窒素",l:1},{n:8,s:"O",m:"酸素",l:1},{n:9,s:"F",m:"フッ素",l:1},{n:10,s:"Ne",m:"ネオン",l:1},{n:11,s:"Na",m:"ナトリウム",l:1},{n:12,s:"Mg",m:"マグネシウム",l:1},{n:13,s:"Al",m:"アルミニウム",l:1},{n:14,s:"Si",m:"ケイ素",l:1},{n:15,s:"P",m:"リン",l:1},{n:16,s:"S",m:"硫黄",l:1},{n:17,s:"Cl",m:"塩素",l:1},{n:18,s:"Ar",m:"アルゴン",l:1},{n:19,s:"K",m:"カリウム",l:1},{n:20,s:"Ca",m:"カルシウム",l:1},{n:25,s:"Mn",m:"マンガン",l:2},{n:26,s:"Fe",m:"鉄",l:2},{n:29,s:"Cu",m:"銅",l:2},{n:30,s:"Zn",m:"亜鉛",l:2},{n:35,s:"Br",m:"臭素",l:2},{n:47,s:"Ag",m:"銀",l:2},{n:50,s:"Sn",m:"スズ",l:2},{n:53,s:"I",m:"ヨウ素",l:2},{n:56,s:"Ba",m:"バリウム",l:2},{n:78,s:"Pt",m:"白金",l:2},{n:79,s:"Au",m:"金",l:2},{n:80,s:"Hg",m:"水銀",l:2},{n:82,s:"Pb",m:"鉛",l:2},
-            // Lv3: すべて
-            {n:1,s:"H",m:"水素",l:1},{n:2,s:"He",m:"ヘリウム",l:1},{n:3,s:"Li",m:"リチウム",l:1},{n:4,s:"Be",m:"ベリリウム",l:1},{n:5,s:"B",m:"ホウ素",l:1},{n:6,s:"C",m:"炭素",l:1},{n:7,s:"N",m:"窒素",l:1},{n:8,s:"O",m:"酸素",l:1},{n:9,s:"F",m:"フッ素",l:1},{n:10,s:"Ne",m:"ネオン",l:1},{n:11,s:"Na",m:"ナトリウム",l:1},{n:12,s:"Mg",m:"マグネシウム",l:1},{n:13,s:"Al",m:"アルミニウム",l:1},{n:14,s:"Si",m:"ケイ素",l:1},{n:15,s:"P",m:"リン",l:1},{n:16,s:"S",m:"硫黄",l:1},{n:17,s:"Cl",m:"塩素",l:1},{n:18,s:"Ar",m:"アルゴン",l:1},{n:19,s:"K",m:"カリウム",l:1},{n:20,s:"Ca",m:"カルシウム",l:1},{n:25,s:"Mn",m:"マンガン",l:2},{n:26,s:"Fe",m:"鉄",l:2},{n:29,s:"Cu",m:"銅",l:2},{n:30,s:"Zn",m:"亜鉛",l:2},{n:35,s:"Br",m:"臭素",l:2},{n:47,s:"Ag",m:"銀",l:2},{n:50,s:"Sn",m:"スズ",l:2},{n:53,s:"I",m:"ヨウ素",l:2},{n:56,s:"Ba",m:"バリウム",l:2},{n:78,s:"Pt",m:"白金",l:2},{n:79,s:"Au",m:"金",l:2},{n:80,s:"Hg",m:"水銀",l:2},{n:82,s:"Pb",m:"鉛",l:2},{n:21,s:"Sc",m:"スカンジウム",l:3},{n:22,s:"Ti",m:"チタン",l:3},{n:23,s:"V",m:"バナジウム",l:3},{n:24,s:"Cr",m:"クロム",l:3},{n:27,s:"Co",m:"コバルト",l:3},{n:28,s:"Ni",m:"ニッケル",l:3},{n:31,s:"Ga",m:"ガリウム",l:3},{n:32,s:"Ge",m:"ゲルマニウム",l:3},{n:33,s:"As",m:"ヒ素",l:3},{n:34,s:"Se",m:"セレン",l:3},{n:36,s:"Kr",m:"クリプトン",l:3},{n:37,s:"Rb",m:"ルビジウム",l:3},{n:38,s:"Sr",m:"ストロンチウム",l:3},{n:39,s:"Y",m:"イットリウム",l:3},{n:40,s:"Zr",m:"ジルコニウム",l:3},{n:41,s:"Nb",m:"ニオブ",l:3},{n:42,s:"Mo",m:"モリブデン",l:3},{n:43,s:"Tc",m:"テクネチウム",l:3},{n:44,s:"Ru",m:"ルテニウム",l:3},{n:45,s:"Rh",m:"ロジウム",l:3},{n:46,s:"Pd",m:"パラジウム",l:3},{n:48,s:"Cd",m:"カドミウム",l:3},{n:49,s:"In",m:"インジウム",l:3},{n:51,s:"Sb",m:"アンチモン",l:3},{n:52,s:"Te",m:"テルル",l:3},{n:54,s:"Xe",m:"キセノン",l:3},{n:55,s:"Cs",m:"セシウム",l:3},{n:57,s:"La",m:"ランタン",l:3},{n:58,s:"Ce",m:"セリウム",l:3},{n:59,s:"Pr",m:"プラセオジム",l:3},{n:60,s:"Nd",m:"ネオジム",l:3},{n:61,s:"Pm",m:"プロメチウム",l:3},{n:62,s:"Sm",m:"サマリウム",l:3},{n:63,s:"Eu",m:"ユウロピウム",l:3},{n:64,s:"Gd",m:"ガドリニウム",l:3},{n:65,s:"Tb",m:"テルビウム",l:3},{n:66,s:"Dy",m:"ジスプロシウム",l:3},{n:67,s:"Ho",m:"ホルミウム",l:3},{n:68,s:"Er",m:"エルビウム",l:3},{n:69,s:"Tm",m:"ツリウム",l:3},{n:70,s:"Yb",m:"イッテルビウム",l:3},{n:71,s:"Lu",m:"ルテチウム",l:3},{n:72,s:"Hf",m:"ハフニウム",l:3},{n:73,s:"Ta",m:"タンタル",l:3},{n:74,s:"W",m:"タングステン",l:3},{n:75,s:"Re",m:"レニウム",l:3},{n:76,s:"Os",m:"オスミウム",l:3},{n:77,s:"Ir",m:"イリジウム",l:3},{n:81,s:"Tl",m:"タリウム",l:3},{n:83,s:"Bi",m:"ビスマス",l:3},{n:84,s:"Po",m:"ポロニウム",l:3},{n:85,s:"At",m:"アスタチン",l:3},{n:86,s:"Rn",m:"ラドン",l:3},{n:87,s:"Fr",m:"フランシウム",l:3},{n:88,s:"Ra",m:"ラジウム",l:3},{n:89,s:"Ac",m:"アクチニウム",l:3},{n:90,s:"Th",m:"トリウム",l:3},{n:91,s:"Pa",m:"プロトアクチニウム",l:3},{n:92,s:"U",m:"ウラン",l:3},{n:93,s:"Np",m:"ネプツニウム",l:3},{n:94,s:"Pu",m:"プルトニウム",l:3},{n:95,s:"Am",m:"アメリシウム",l:3},{n:96,s:"Cm",m:"キュリウム",l:3},{n:97,s:"Bk",m:"バークリウム",l:3},{n:98,s:"Cf",m:"カリホルニウム",l:3},{n:99,s:"Es",m:"アインシュタニウム",l:3},{n:100,s:"Fm",m:"フェルミウム",l:3},{n:101,s:"Md",m:"メンデレビウム",l:3},{n:102,s:"No",m:"ノーベリウム",l:3},{n:103,s:"Lr",m:"ローレンシウム",l:3},{n:104,s:"Rf",m:"ラザホージウム",l:3},{n:105,s:"Db",m:"ドブニウム",l:3},{n:106,s:"Sg",m:"シーボーギウム",l:3},{n:107,s:"Bh",m:"ボーリウム",l:3},{n:108,s:"Hs",m:"ハッシウム",l:3},{n:109,s:"Mt",m:"マイトネリウム",l:3},{n:110,s:"Ds",m:"ダームスタチウム",l:3},{n:111,s:"Rg",m:"レントゲニウム",l:3},{n:112,s:"Cn",m:"コペルニシウム",l:3},{n:113,s:"Nh",m:"ニホニウム",l:3},{n:114,s:"Fl",m:"フレロビウム",l:3},{n:115,s:"Mc",m:"モスコビウム",l:3},{n:116,s:"Lv",m:"リバモリウム",l:3},{n:117,s:"Ts",m:"テネシン",l:3},{n:118,s:"Og",m:"オガネソン",l:3}
+            {n:25,s:"Mn",m:"マンガン",l:2},{n:26,s:"Fe",m:"鉄",l:2},{n:29,s:"Cu",m:"銅",l:2},{n:30,s:"Zn",m:"亜鉛",l:2},{n:47,s:"Ag",m:"銀",l:2},{n:53,s:"I",m:"ヨウ素",l:2},{n:80,s:"Hg",m:"水銀",l:2},{n:118,s:"Og",m:"オガネソン",l:3}
         ];
 
         let currentPool = [];
@@ -178,21 +156,21 @@
         let timer;
         let selectedLeft = null;
         let selectedRight = null;
-        let missedElements = new Set();
+        let currentLevel = 1;
 
-        function startGame(level) {
+        window.startGame = (level) => {
+            currentLevel = level;
             document.getElementById('home-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
             currentPool = allElements.filter(el => el.l <= level);
             initGrid();
             startTimer();
-        }
+        };
 
         function startTimer() {
             timer = setInterval(() => {
                 timeLeft -= 0.1;
-                const bar = document.getElementById('progress-bar');
-                if(bar) bar.style.width = Math.max(0, (timeLeft / 40 * 100)) + '%';
+                document.getElementById('progress-bar').style.width = (timeLeft / 40 * 100) + '%';
                 if (timeLeft <= 0) endGame();
             }, 100);
         }
@@ -200,11 +178,10 @@
         function initGrid() {
             const leftCol = document.getElementById('left-column');
             const rightCol = document.getElementById('right-column');
-            const initialSet = [...currentPool].sort(() => 0.5 - Math.random()).slice(0, 5);
-            const names = initialSet.map(el => ({ id: el.n, text: el.m }));
-            const symbols = initialSet.map(el => ({ id: el.n, text: el.s }));
-            names.sort(() => 0.5 - Math.random());
-            symbols.sort(() => 0.5 - Math.random());
+            leftCol.innerHTML = ''; rightCol.innerHTML = '';
+            const set = [...currentPool].sort(() => 0.5 - Math.random()).slice(0, 5);
+            const names = set.map(e => ({id:e.n, text:e.m})).sort(() => 0.5 - Math.random());
+            const symbols = set.map(e => ({id:e.n, text:e.s})).sort(() => 0.5 - Math.random());
             names.forEach(item => leftCol.appendChild(createBtn(item, 'left')));
             symbols.forEach(item => rightCol.appendChild(createBtn(item, 'right')));
         }
@@ -232,26 +209,16 @@
         }
 
         function checkMatch() {
-            const l = selectedLeft;
-            const r = selectedRight;
-            selectedLeft = null;
-            selectedRight = null;
-
+            const l = selectedLeft; const r = selectedRight;
+            selectedLeft = null; selectedRight = null;
             if (l.dataset.id === r.dataset.id) {
                 score += 10;
                 document.getElementById('score-display').textContent = `スコア: ${score}`;
-                l.classList.add('fade-out');
-                r.classList.add('fade-out');
-                setTimeout(() => { replaceButtons(l, r); }, 1500); // 1.5秒に調整
+                l.classList.add('fade-out'); r.classList.add('fade-out');
+                setTimeout(() => replaceButtons(l, r), 1500); // 1.5秒待機
             } else {
-                const missEl = currentPool.find(e => e.n == l.dataset.id);
-                if(missEl) missedElements.add(`${missEl.m} (${missEl.s})`);
-                l.classList.add('error');
-                r.classList.add('error');
-                setTimeout(() => {
-                    l.classList.remove('error', 'selected');
-                    r.classList.remove('error', 'selected');
-                }, 500);
+                l.classList.add('error'); r.classList.add('error');
+                setTimeout(() => { l.classList.remove('error', 'selected'); r.classList.remove('error', 'selected'); }, 500);
             }
         }
 
@@ -259,26 +226,44 @@
             const newEl = currentPool[Math.floor(Math.random() * currentPool.length)];
             l.textContent = newEl.m; l.dataset.id = newEl.n;
             r.textContent = newEl.s; r.dataset.id = newEl.n;
-            l.classList.remove('fade-out', 'selected', 'error');
-            r.classList.remove('fade-out', 'selected', 'error');
+            l.classList.remove('fade-out', 'selected'); r.classList.remove('fade-out', 'selected');
         }
 
         function endGame() {
             clearInterval(timer);
             document.getElementById('game-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'block';
-            document.getElementById('final-score').textContent = `最終スコア: ${score} 点`;
-            const ul = document.getElementById('miss-ul');
-            ul.innerHTML = "";
-            if (missedElements.size === 0) {
-                ul.innerHTML = "<li>全問正解！素晴らしい！</li>";
-            } else {
-                missedElements.forEach(item => {
-                    const li = document.createElement('li');
-                    li.textContent = item;
-                    ul.appendChild(li);
+            document.getElementById('final-score').textContent = `${score} 点`;
+            showRanking(currentLevel);
+        }
+
+        window.handleRegistration = async () => {
+            const school = document.getElementById('school-name').value;
+            const nickname = document.getElementById('nickname').value;
+            if (!school || !nickname) return alert("入力してください");
+            try {
+                await addDoc(collection(db, "match_rankings"), {
+                    school, nickname, score, level: currentLevel, date: new Date()
                 });
-            }
+                alert("登録完了！");
+                document.getElementById('registration-area').style.display = 'none';
+                showRanking(currentLevel);
+            } catch (e) { alert("エラー: インデックス作成が必要な場合があります"); }
+        };
+
+        async function showRanking(level) {
+            const q = query(collection(db, "match_rankings"), where("level", "==", level), orderBy("score", "desc"), limit(10));
+            try {
+                const snap = await getDocs(q);
+                let html = `<h3>🏆 Lv.${level} TOP 10</h3><table class="ranking-table"><tr><th>位</th><th>高校</th><th>名</th><th>点</th></tr>`;
+                let rank = 1;
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    html += `<tr><td>${rank}</td><td>${d.school}</td><td>${d.nickname}</td><td>${d.score}</td></tr>`;
+                    rank++;
+                });
+                document.getElementById('ranking-display').innerHTML = html + "</table>";
+            } catch (e) { document.getElementById('ranking-display').innerHTML = "<p>ランキング読み込み中...</p>"; }
         }
     </script>
 </body>
