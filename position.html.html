@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポジションマスター - Periodic Explorer 118</title>
+    <style>
+        :root {
+            --primary-color: #58cc02;
+            --error-color: #ff4b4b;
+            --text-color: #4b4b4b;
+            --bg-color: #f7f7f7;
+            --cell-size: 36px;
+            --cell-gap: 2px;
+            --label-color: #999;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #home-screen, #game-screen, #result-screen {
+            display: none;
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #home-screen { display: block; }
+
+        .periodic-wrapper {
+            display: inline-grid;
+            grid-template-columns: 30px repeat(18, var(--cell-size));
+            grid-template-rows: 30px repeat(7, var(--cell-size)) 10px repeat(2, var(--cell-size));
+            gap: var(--cell-gap);
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 10px auto;
+            overflow-x: auto;
+        }
+
+        .label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: var(--label-color);
+            font-weight: bold;
+        }
+
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .cell.empty { background: transparent; border: none; }
+        .cell.spacer { grid-column: 1 / 20; background: transparent; border: none; }
+
+        .cell.target {
+            border: 2px solid #333;
+            animation: blink 0.8s infinite;
+            z-index: 5;
+        }
+
+        @keyframes blink {
+            0%, 100% { background: #fff; }
+            50% { background: #ffeb3b; }
+        }
+
+        .cell.correct-fill { background: var(--primary-color); color: white; border: none; font-size: 12px; }
+
+        .choices-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            background: white;
+            border: 2px solid #e5e5e5;
+            border-bottom: 4px solid #e5e5e5;
+            border-radius: 10px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            min-width: 50px;
+        }
+
+        .btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+        .btn.correct { background: var(--primary-color); color: white; border-color: #45a302; }
+        .btn.wrong { background: var(--error-color); color: white; border-color: #c43b3b; }
+
+        .level-btn { width: 80%; margin: 10px auto; display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="home-screen">
+        <h1>ポジションマスター</h1>
+        <p>周期表の光った場所に入る元素を当てよう！（10問）</p>
+        <button class="btn level-btn" onclick="startGame(1)">Lv.1：基本20元素</button>
+        <button class="btn level-btn" onclick="startGame(2)">Lv.2：受験頻出</button>
+        <button class="btn level-btn" onclick="startGame(3)">Lv.3：全118元素</button>
+    </div>
+
+    <div id="game-screen">
+        <h2 id="question-counter">第 1 / 10 問</h2>
+        <div class="periodic-wrapper" id="table-grid"></div>
+        <div class="choices-container" id="choices"></div>
+    </div>
+
+    <div id="result-screen">
+        <h2>リザルト</h2>
+        <div class="periodic-wrapper" id="result-table-grid"></div>
+        <p id="final-stats" style="font-size: 20px; font-weight: bold;"></p>
+        <button class="btn" onclick="location.reload()" style="background: var(--primary-color); color: white;">ホームに戻る</button>
+    </div>
+
+    <script>
+        // 全118元素データ生成
+        const rawElements = [
+            "H,1,1,1,1","He,1,18,1,1","Li,3,1,2,1","Be,4,2,2,1","B,5,13,2,1","C,6,14,2,1","N,7,15,2,1","O,8,16,2,1","F,9,17,2,1","Ne,10,18,2,1",
+            "Na,11,1,3,1","Mg,12,2,3,1","Al,13,13,3,1","Si,14,14,3,1","P,15,15,3,1","S,16,16,3,1","Cl,17,17,3,1","Ar,18,18,3,1",
+            "K,19,1,4,1","Ca,20,2,4,1","Sc,21,3,4,3","Ti,22,4,4,3","V,23,5,4,3","Cr,24,6,4,3","Mn,25,7,4,2","Fe,26,8,4,2","Co,27,9,4,3","Ni,28,10,4,3","Cu,29,11,4,2","Zn,30,12,4,2","Ga,31,13,4,3","Ge,32,14,4,3","As,33,15,4,3","Se,34,16,4,3","Br,35,17,4,2","Kr,36,18,4,3",
+            "Rb,37,1,5,3","Sr,38,2,5,3","Y,39,3,5,3","Zr,40,4,5,3","Nb,41,5,5,3","Mo,42,6,5,3","Tc,43,7,5,3","Ru,44,8,5,3","Rh,45,9,5,3","Pd,46,10,5,3","Ag,47,11,5,2","Cd,48,12,5,3","In,49,13,5,3","Sn,50,14,5,2","Sb,51,15,5,3","Te,52,16,5,3","I,53,17,5,2","Xe,54,18,5,3",
+            "Cs,55,1,6,3","Ba,56,2,6,2","La,57,4,9,3","Ce,58,5,9,3","Pr,59,6,9,3","Nd,60,7,9,3","Pm,61,8,9,3","Sm,62,9,9,3","Eu,63,10,9,3","Gd,64,11,9,3","Tb,65,12,9,3","Dy,66,13,9,3","Ho,67,14,9,3","Er,68,15,9,3","Tm,69,16,9,3","Yb,70,17,9,3","Lu,71,18,9,3",
+            "Hf,72,4,6,3","Ta,73,5,6,3","W,74,6,6,3","Re,75,7,6,3","Os,76,8,6,3","Ir,77,9,6,3","Pt,78,10,6,2","Au,79,11,6,2","Hg,80,12,6,2","Tl,81,13,6,3","Pb,82,14,6,2","Bi,83,15,6,3","Po,84,16,6,3","At,85,17,6,3","Rn,86,18,6,3",
+            "Fr,87,1,7,3","Ra,88,2,7,3","Ac,89,4,10,3","Th,90,5,10,3","Pa,91,6,10,3","U,92,7,10,3","Np,93,8,10,3","Pu,94,9,10,3","Am,95,10,10,3","Cm,96,11,10,3","Bk,97,12,10,3","Cf,98,13,10,3","Es,99,14,10,3","Fm,100,15,10,3","Md,101,16,10,3","No,102,17,10,3","Lr,103,18,10,3",
+            "Rf,104,4,7,3","Db,105,5,7,3","Sg,106,6,7,3","Bh,107,7,7,3","Hs,108,8,7,3","Mt,109,9,7,3","Ds,110,10,7,3","Rg,111,11,7,3","Cn,112,12,7,3","Nh,113,13,7,3","Fl,114,14,7,3","Mc,115,15,7,3","Lv,116,16,7,3","Ts,117,17,7,3","Og,118,18,7,3"
+        ];
+
+        const elements = rawElements.map(item => {
+            const [s, n, c, r, l] = item.split(',');
+            return { s, n: parseInt(n), c: parseInt(c), r: parseInt(r), l: parseInt(l) };
+        });
+
+        let currentPool = [];
+        let questionIndex = 0;
+        let correctCount = 0;
+        let targetEl = null;
+        let solvedElements = [];
+
+        function startGame(level) {
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            currentPool = elements.filter(el => el.l <= level);
+            createTableStructure('table-grid');
+            nextQuestion();
+        }
+
+        function createTableStructure(containerId) {
+            const grid = document.getElementById(containerId);
+            grid.innerHTML = '';
+            grid.appendChild(createDiv('label', ''));
+            for (let c = 1; c <= 18; c++) grid.appendChild(createDiv('label', c));
+
+            for (let r = 1; r <= 7; r++) {
+                grid.appendChild(createDiv('label', r));
+                for (let c = 1; c <= 18; c++) grid.appendChild(createCell(containerId, c, r));
+            }
+            grid.appendChild(createDiv('cell spacer', ''));
+            const labels = ["*", "**"];
+            for (let r = 9; r <= 10; r++) {
+                grid.appendChild(createDiv('label', labels[r-9]));
+                for (let c = 1; c <= 3; c++) grid.appendChild(createDiv('cell empty', ''));
+                for (let c = 4; c <= 18; c++) grid.appendChild(createCell(containerId, c, r));
+            }
+        }
+
+        function createCell(containerId, c, r) {
+            const elAt = elements.find(e => e.c === c && e.r === r);
+            const cell = document.createElement('div');
+            cell.id = `${containerId}-${c}-${r}`;
+            cell.className = elAt ? 'cell' : 'cell empty';
+            return cell;
+        }
+
+        function createDiv(className, text) {
+            const div = document.createElement('div');
+            div.className = className;
+            div.textContent = text;
+            return div;
+        }
+
+        function nextQuestion() {
+            questionIndex++;
+            if (questionIndex > 10) return showResult();
+            document.getElementById('question-counter').textContent = `第 ${questionIndex} / 10 問`;
+            targetEl = currentPool[Math.floor(Math.random() * currentPool.length)];
+            document.querySelectorAll('.cell').forEach(c => {
+                if(!c.classList.contains('empty') && !c.classList.contains('spacer')) {
+                    c.className = 'cell'; c.textContent = '';
+                }
+            });
+            const targetCell = document.getElementById(`table-grid-${targetEl.c}-${targetEl.r}`);
+            if(targetCell) targetCell.classList.add('target');
+            renderChoices();
+        }
+
+        function renderChoices() {
+            const container = document.getElementById('choices');
+            container.innerHTML = '';
+            let choices = [targetEl];
+            while(choices.length < 4) {
+                let r = currentPool[Math.floor(Math.random() * currentPool.length)];
+                if(!choices.includes(r)) choices.push(r);
+            }
+            choices.sort(() => 0.5 - Math.random()).forEach(el => {
+                const b = document.createElement('button');
+                b.className = 'btn'; b.textContent = el.s;
+                b.onclick = () => checkAnswer(el, b);
+                container.appendChild(b);
+            });
+        }
+
+        function checkAnswer(selected, btn) {
+            document.querySelectorAll('#choices .btn').forEach(b => b.style.pointerEvents = 'none');
+            if (selected.n === targetEl.n) {
+                btn.classList.add('correct');
+                correctCount++;
+                solvedElements.push(targetEl);
+            } else {
+                btn.classList.add('wrong');
+            }
+            const cell = document.getElementById(`table-grid-${targetEl.c}-${targetEl.r}`);
+            if(cell) {
+                cell.textContent = targetEl.s;
+                cell.classList.remove('target');
+                cell.classList.add('correct-fill');
+            }
+            setTimeout(nextQuestion, 1500);
+        }
+
+        function showResult() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'block';
+            createTableStructure('result-table-grid');
+            solvedElements.forEach(el => {
+                const cell = document.getElementById(`result-table-grid-${el.c}-${el.r}`);
+                if(cell) {
+                    cell.textContent = el.s;
+                    cell.classList.add('correct-fill');
+                }
+            });
+            document.getElementById('final-stats').textContent = `10問中 ${correctCount} 問正解！`;
+        }
+    </script>
+</body>
+</html>
