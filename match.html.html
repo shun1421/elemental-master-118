@@ -15,7 +15,7 @@
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Helvetica Neue'， Arial， sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
@@ -26,7 +26,7 @@
             touch-action: manipulation;
         }
 
-        #home-screen, #game-screen, #result-screen {
+        #home-screen， #confirm-screen， #game-screen， #result-screen {
             display: none;
             width: 100%;
             max-width: 500px;
@@ -67,7 +67,7 @@
 
         .match-btn {
             height: 80px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
-            transition: opacity 0.3s, transform 0.3s, background 0.2s; width: 100%; margin: 0;
+            transition: opacity 0.3s， transform 0.3s， background 0.2s; width: 100%; margin: 0;
             background: white; border: 2px solid var(--btn-border); border-bottom: 4px solid var(--btn-border); border-radius: 12px; font-weight: bold; cursor: pointer;
         }
 
@@ -76,41 +76,44 @@
         .match-btn.error { animation: shake 0.3s; background: #ffdbdb; border-color: var(--error-color); color: var(--error-color); pointer-events: none; }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
+            0%， 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
 
-        /* ランキング表示用 */
         .ranking-container {
-            max-height: 400px; overflow-y: auto; margin-top: 20px; text-align: left;
+            max-height: 450px; overflow-y: auto; margin: 20px 0; border: 1px solid #eee; border-radius: 12px; background: white;
         }
         .ranking-table {
-            width: 100%; border-collapse: collapse; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden;
+            width: 100%; border-collapse: collapse;
         }
-        .ranking-table th, .ranking-table td { padding: 8px; border-bottom: 1px solid #eee; font-size: 13px; text-align: center; }
-        .ranking-table th { background: #f9f9f9; color: var(--secondary-color); }
+        .ranking-table th， .ranking-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; text-align: center; }
+        .ranking-table th { background: #f9f9f9; color: var(--secondary-color); position: sticky; top: 0; }
 
         .input-group { background: white; padding: 20px; border-radius: 12px; border: 2px solid var(--primary-color); margin: 20px 0; }
         .input-group input { width: 80%; padding: 10px; margin: 5px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
 
         h1 { color: var(--primary-color); }
-        h3 { border-left: 4px solid var(--secondary-color); padding-left: 10px; margin-top: 20px; }
+        h2 { color: var(--secondary-color); margin-top: 0; }
     </style>
 </head>
 <body>
 
     <div id="home-screen">
         <h1>元素マッチング</h1>
-        <p>レベルを選んでスタート！</p>
-        <button class="btn" onclick="startGame(1)">Lv.1：基本20元素</button>
-        <button class="btn" onclick="startGame(2)">Lv.2：受験頻出</button>
-        <button class="btn" onclick="startGame(3)">Lv.3：全118元素</button>
+        <p>レベルを選んでランキングをチェック！</p>
+        <button class="btn" onclick="showConfirm(1)">Lv.1：基本20元素</button>
+        <button class="btn" onclick="showConfirm(2)">Lv.2：受験頻出</button>
+        <button class="btn" onclick="showConfirm(3)">Lv.3：全118元素</button>
+    </div>
 
-        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-        <div id="home-ranking-display" class="ranking-container">
-            <p>ランキングを読み込み中...</p>
+    <div id="confirm-screen">
+        <h2 id="confirm-title">Lv.1 ランキング</h2>
+        <div id="confirm-ranking-display" class="ranking-container">
+            <p>読み込み中...</p>
         </div>
+        <button id="start-btn" class="btn" style="background: var(--primary-color); color: white; border:none;">ゲーム開始！</button>
+        <button class="btn" onclick="location.reload()">戻る</button>
     </div>
 
     <div id="game-screen">
@@ -133,21 +136,21 @@
             <button class="btn" onclick="handleRegistration()" style="background: var(--primary-color); color: white; border:none;">スコアを送信</button>
         </div>
 
-        <div id="result-ranking-display"></div>
+        <div id="result-ranking-display" class="ranking-container"></div>
         <button class="btn" onclick="location.reload()">ホームへ戻る</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore， collection， addDoc， query， orderBy， limit， getDocs， where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyDLK0eDVAMdb-pMu3j0CphI_GQSCWN-E_U",
-            authDomain: "element-master-118.firebaseapp.com",
-            projectId: "element-master-118",
-            storageBucket: "element-master-118.firebasestorage.app",
-            messagingSenderId: "487005219905",
-            appId: "1:487005219905:web:61da7b9e737cc1137daac0",
+            apiKey: "AIzaSyDLK0eDVAMdb-pMu3j0CphI_GQSCWN-E_U"，
+            authDomain: "element-master-118.firebaseapp.com"，
+            projectId: "element-master-118"，
+            storageBucket: "element-master-118.firebasestorage.app"，
+            messagingSenderId: "487005219905"，
+            appId: "1:487005219905:web:61da7b9e737cc1137daac0"，
             measurementId: "G-PQHX6S6PMJ"
         };
 
@@ -155,9 +158,9 @@
         const db = getFirestore(app);
 
         const allElements = [
-            {n:1,s:"H",m:"水素",l:1},{n:2,s:"He",m:"ヘリウム",l:1},{n:3,s:"Li",m:"リチウム",l:1},{n:4,s:"Be",m:"ベリリウム",l:1},{n:5,s:"B",m:"ホウ素",l:1},{n:6,s:"C",m:"炭素",l:1},{n:7,s:"N",m:"窒素",l:1},{n:8,s:"O",m:"酸素",l:1},{n:9,s:"F",m:"フッ素",l:1},{n:10,s:"Ne",m:"ネオン",l:1},{n:11,s:"Na",m:"ナトリウム",l:1},{n:12,s:"Mg",m:"マグネシウム",l:1},{n:13,s:"Al",m:"アルミニウム",l:1},{n:14,s:"Si",m:"ケイ素",l:1},{n:15,s:"P",m:"リン",l:1},{n:16,s:"S",m:"硫黄",l:1},{n:17,s:"Cl",m:"塩素",l:1},{n:18,s:"Ar",m:"アルゴン",l:1},{n:19,s:"K",m:"カリウム",l:1},{n:20,s:"Ca",m:"カルシウム",l:1},
-            {n:24,s:"Cr",m:"クロム",l:2},{n:25,s:"Mn",m:"マンガン",l:2},{n:26,s:"Fe",m:"鉄",l:2},{n:27,s:"Co",m:"コバルト",l:2},{n:28,s:"Ni",m:"ニッケル",l:2},{n:29,s:"Cu",m:"銅",l:2},{n:30,s:"Zn",m:"亜鉛",l:2},{n:35,s:"Br",m:"臭素",l:2},{n:47,s:"Ag",m:"銀",l:2},{n:48,s:"Cd",m:"カドミウム",l:2},{n:50,s:"Sn",m:"スズ",l:2},{n:53,s:"I",m:"ヨウ素",l:2},{n:56,s:"Ba",m:"バリウム",l:2},{n:78,s:"Pt",m:"白金",l:2},{n:79,s:"Au",m:"金",l:2},{n:80,s:"Hg",m:"水銀",l:2},{n:82,s:"Pb",m:"鉛",l:2},
-            {n:21,s:"Sc",m:"スカンジウム",l:3},{n:22,s:"Ti",m:"チタン",l:3},{n:23,s:"V",m:"バナジウム",l:3},{n:31,s:"Ga",m:"ガリウム",l:3},{n:32,s:"Ge",m:"ゲルマニウム",l:3},{n:33,s:"As",m:"ヒ素",l:3},{n:34,s:"Se",m:"セレン",l:3},{n:36,s:"Kr",m:"クリプトン",l:3},{n:37,s:"Rb",m:"ルビジウム",l:3},{n:38,s:"Sr",m:"ストロンチウム",l:3},{n:39,s:"Y",m:"イットリウム",l:3},{n:40,s:"Zr",m:"ジルコニウム",l:3},{n:41,s:"Nb",m:"ニオブ",l:3},{n:42,s:"Mo",m:"モリブデン",l:3},{n:43,s:"Tc",m:"テクネチウム",l:3},{n:44,s:"Ru",m:"ルテニウム",l:3},{n:45,s:"Rh",m:"ロジウム",l:3},{n:46,s:"Pd",m:"パラジウム",l:3},{n:49,s:"In",m:"インジウム",l:3},{n:51,s:"Sb",m:"アンチモン",l:3},{n:52,s:"Te",m:"テルル",l:3},{n:54,s:"Xe",m:"キセノン",l:3},{n:55,s:"Cs",m:"セシウム",l:3},{n:57,s:"La",m:"ランタン",l:3},{n:58,s:"Ce",m:"セリウム",l:3},{n:59,s:"Pr",m:"プラセオジム",l:3},{n:60,s:"Nd",m:"ネオジム",l:3},{n:61,s:"Pm",m:"プロメチウム",l:3},{n:62,s:"Sm",m:"サマリウム",l:3},{n:63,s:"Eu",m:"ユウロピウム",l:3},{n:64,s:"Gd",m:"ガドリニウム",l:3},{n:65,s:"Tb",m:"テルビウム",l:3},{n:66,s:"Dy",m:"ジスプロシウム",l:3},{n:67,s:"Ho",m:"ホルミウム",l:3},{n:68,s:"Er",m:"エルビウム",l:3},{n:69,s:"Tm",m:"ツリウム",l:3},{n:70,s:"Yb",m:"イッテルビウム",l:3},{n:71,s:"Lu",m:"ルテチウム",l:3},{n:72,s:"Hf",m:"ハフニウム",l:3},{n:73,s:"Ta",m:"タンタル",l:3},{n:74,s:"W",m:"タングステン",l:3},{n:75,s:"Re",m:"レニウム",l:3},{n:76,s:"Os",m:"オスミウム",l:3},{n:77,s:"Ir",m:"イリジウム",l:3},{n:81,s:"Tl",m:"タリウム",l:3},{n:83,s:"Bi",m:"ビスマス",l:3},{n:84,s:"Po",m:"ポロニウム",l:3},{n:85,s:"At",m:"アスタチン",l:3},{n:86,s:"Rn",m:"ラドン",l:3},{n:87,s:"Fr",m:"フランシウム",l:3},{n:88,s:"Ra",m:"ラジウム",l:3},{n:89,s:"Ac",m:"アクチニウム",l:3},{n:90,s:"Th",m:"トリウム",l:3},{n:91,s:"Pa",m:"プロトアクチニウム",l:3},{n:92,s:"U",m:"ウラン",l:3},{n:93,s:"Np",m:"ネプツニウム",l:3},{n:94,s:"Pu",m:"プルトニウム",l:3},{n:95,s:"Am",m:"アメリシウム",l:3},{n:96,s:"Cm",m:"キュリウム",l:3},{n:97,s:"Bk",m:"バークリウム",l:3},{n:98,s:"Cf",m:"カリホルニウム",l:3},{n:99,s:"Es",m:"アインシュタニウム",l:3},{n:100,s:"Fm",m:"フェルミウム",l:3},{n:101,s:"Md",m:"メンデレビウム",l:3},{n:102,s:"No",m:"ノーベリウム",l:3},{n:103,s:"Lr",m:"ローレンシウム",l:3},{n:104,s:"Rf",m:"ラザホージウム",l:3},{n:105,s:"Db",m:"ドブニウム",l:3},{n:106,s:"Sg",m:"シーボーギウム",l:3},{n:107,s:"Bh",m:"ボーリウム",l:3},{n:108,s:"Hs",m:"ハッシウム",l:3},{n:109,s:"Mt",m:"マイトネリウム",l:3},{n:110,s:"Ds",m:"ダームスタチウム",l:3},{n:111,s:"Rg",m:"レントゲニウム",l:3},{n:112,s:"Cn",m:"コペルニシウム",l:3},{n:113,s:"Nh",m:"ニホニウム",l:3},{n:114,s:"Fl",m:"フレロビウム",l:3},{n:115,s:"Mc",m:"モスコビウム",l:3},{n:116,s:"Lv",m:"リバモリウム",l:3},{n:117,s:"Ts",m:"テネシン",l:3},{n:118,s:"Og",m:"オガネソン",l:3}
+            {n:1，s:"H"，m:"水素"，l:1}，{n:2，s:"He"，m:"ヘリウム"，l:1}，{n:3，s:"Li"，m:"リチウム"，l:1}，{n:4，s:"Be"，m:"ベリリウム"，l:1}，{n:5，s:"B"，m:"ホウ素"，l:1}，{n:6，s:"C"，m:"炭素"，l:1}，{n:7，s:"N"，m:"窒素"，l:1}，{n:8，s:"O"，m:"酸素"，l:1}，{n:9，s:"F"，m:"フッ素"，l:1}，{n:10，s:"Ne"，m:"ネオン"，l:1}，{n:11，s:"Na"，m:"ナトリウム"，l:1}，{n:12，s:"Mg"，m:"マグネシウム"，l:1}，{n:13，s:"Al"，m:"アルミニウム"，l:1}，{n:14，s:"Si"，m:"ケイ素"，l:1}，{n:15，s:"P"，m:"リン"，l:1}，{n:16，s:"S"，m:"硫黄"，l:1}，{n:17，s:"Cl"，m:"塩素"，l:1}，{n:18，s:"Ar"，m:"アルゴン"，l:1}，{n:19，s:"K"，m:"カリウム"，l:1}，{n:20，s:"Ca"，m:"カルシウム"，l:1}，
+            {n:24，s:"Cr"，m:"クロム"，l:2}，{n:25，s:"Mn"，m:"マンガン"，l:2}，{n:26，s:"Fe"，m:"鉄"，l:2}，{n:27，s:"Co"，m:"コバルト"，l:2}，{n:28，s:"Ni"，m:"ニッケル"，l:2}，{n:29，s:"Cu"，m:"銅"，l:2}，{n:30，s:"Zn"，m:"亜鉛"，l:2}，{n:35，s:"Br"，m:"臭素"，l:2}，{n:47，s:"Ag"，m:"銀"，l:2}，{n:48，s:"Cd"，m:"カドミウム"，l:2}，{n:50，s:"Sn"，m:"スズ"，l:2}，{n:53，s:"I"，m:"ヨウ素"，l:2}，{n:56，s:"Ba"，m:"バリウム"，l:2}，{n:78，s:"Pt"，m:"白金"，l:2}，{n:79，s:"Au"，m:"金"，l:2}，{n:80，s:"Hg"，m:"水銀"，l:2}，{n:82，s:"Pb"，m:"鉛"，l:2}，
+            {n:21，s:"Sc"，m:"スカンジウム"，l:3}，{n:22，s:"Ti"，m:"チタン"，l:3}，{n:23，s:"V"，m:"バナジウム"，l:3}，{n:31，s:"Ga"，m:"ガリウム"，l:3}，{n:32，s:"Ge"，m:"ゲルマニウム"，l:3}，{n:33，s:"As"，m:"ヒ素"，l:3}，{n:34，s:"Se"，m:"セレン"，l:3}，{n:36，s:"Kr"，m:"クリプトン"，l:3}，{n:37，s:"Rb"，m:"ルビジウム"，l:3}，{n:38，s:"Sr"，m:"ストロンチウム"，l:3}，{n:39，s:"Y"，m:"イットリウム"，l:3}，{n:40，s:"Zr"，m:"ジルコニウム"，l:3}，{n:41，s:"Nb"，m:"ニオブ"，l:3}，{n:42，s:"Mo"，m:"モリブデン"，l:3}，{n:43，s:"Tc"，m:"テクネチウム"，l:3}，{n:44，s:"Ru"，m:"ルテニウム"，l:3}，{n:45，s:"Rh"，m:"ロジウム"，l:3}，{n:46，s:"Pd"，m:"パラジウム"，l:3}，{n:49，s:"In"，m:"インジウム"，l:3}，{n:51，s:"Sb"，m:"アンチモン"，l:3}，{n:52，s:"Te"，m:"テルル"，l:3}，{n:54，s:"Xe"，m:"キセノン"，l:3}，{n:55，s:"Cs"，m:"セシウム"，l:3}，{n:57，s:"La"，m:"ランタン"，l:3}，{n:58，s:"Ce"，m:"セリウム"，l:3}，{n:59，s:"Pr"，m:"プラセオジム"，l:3}，{n:60，s:"Nd"，m:"ネオジム"，l:3}，{n:61，s:"Pm"，m:"プロメチウム"，l:3}，{n:62，s:"Sm"，m:"サマリウム"，l:3}，{n:63，s:"Eu"，m:"ユウロピウム"，l:3}，{n:64，s:"Gd"，m:"ガドリニウム"，l:3}，{n:65，s:"Tb"，m:"テルビウム"，l:3}，{n:66，s:"Dy"，m:"ジスプロシウム"，l:3}，{n:67，s:"Ho"，m:"ホルミウム"，l:3}，{n:68，s:"Er"，m:"エルビウム"，l:3}，{n:69，s:"Tm"，m:"ツリウム"，l:3}，{n:70，s:"Yb"，m:"イッテルビウム"，l:3}，{n:71，s:"Lu"，m:"ルテチウム"，l:3}，{n:72，s:"Hf"，m:"ハフニウム"，l:3}，{n:73，s:"Ta"，m:"タンタル"，l:3}，{n:74，s:"W"，m:"タングステン"，l:3}，{n:75，s:"Re"，m:"レニウム"，l:3}，{n:76，s:"Os"，m:"オスミウム"，l:3}，{n:77，s:"Ir"，m:"イリジウム"，l:3}，{n:81，s:"Tl"，m:"タリウム"，l:3}，{n:83，s:"Bi"，m:"ビスマス"，l:3}，{n:84，s:"Po"，m:"ポロニウム"，l:3}，{n:85，s:"At"，m:"アスタチン"，l:3}，{n:86，s:"Rn"，m:"ラドン"，l:3}，{n:87，s:"Fr"，m:"フランシウム"，l:3}，{n:88，s:"Ra"，m:"ラジウム"，l:3}，{n:89，s:"Ac"，m:"アクチニウム"，l:3}，{n:90，s:"Th"，m:"トリウム"，l:3}，{n:91，s:"Pa"，m:"プロトアクチニウム"，l:3}，{n:92，s:"U"，m:"ウラン"，l:3}，{n:93，s:"Np"，m:"ネプツニウム"，l:3}，{n:94，s:"Pu"，m:"プルトニウム"，l:3}，{n:95，s:"Am"，m:"アメリシウム"，l:3}，{n:96，s:"Cm"，m:"キュリウム"，l:3}，{n:97，s:"Bk"，m:"バークリウム"，l:3}，{n:98，s:"Cf"，m:"カリホルニウム"，l:3}，{n:99，s:"Es"，m:"アインシュタニウム"，l:3}，{n:100，s:"Fm"，m:"フェルミウム"，l:3}，{n:101，s:"Md"，m:"メンデレビウム"，l:3}，{n:102，s:"No"，m:"ノーベリウム"，l:3}，{n:103，s:"Lr"，m:"ローレンシウム"，l:3}，{n:104，s:"Rf"，m:"ラザホージウム"，l:3}，{n:105，s:"Db"，m:"ドブニウム"，l:3}，{n:106，s:"Sg"，m:"シーボーギウム"，l:3}，{n:107，s:"Bh"，m:"ボーリウム"，l:3}，{n:108，s:"Hs"，m:"ハッシウム"，l:3}，{n:109，s:"Mt"，m:"マイトネリウム"，l:3}，{n:110，s:"Ds"，m:"ダームスタチウム"，l:3}，{n:111，s:"Rg"，m:"レントゲニウム"，l:3}，{n:112，s:"Cn"，m:"コペルニシウム"，l:3}，{n:113，s:"Nh"，m:"ニホニウム"，l:3}，{n:114，s:"Fl"，m:"フレロビウム"，l:3}，{n:115，s:"Mc"，m:"モスコビウム"，l:3}，{n:116，s:"Lv"，m:"リバモリウム"，l:3}，{n:117，s:"Ts"，m:"テネシン"，l:3}，{n:118，s:"Og"，m:"オガネソン"，l:3}
         ];
 
         let currentPool = [];
@@ -168,68 +171,87 @@
         let selectedRight = null;
         let currentLevel = 1;
 
-        // 初期読み込み時にランキング表示
-        async function fetchRankings(targetId, maxLimit) {
-            const targetDiv = document.getElementById(targetId);
-            let fullHtml = "";
-            for (let lv = 1; lv <= 3; lv++) {
-                const q = query(collection(db, "match_rankings"), where("level", "==", lv), orderBy("score", "desc"), limit(maxLimit));
-                try {
-                    const snap = await getDocs(q);
-                    fullHtml += `<h3>Lv.${lv} TOP ${maxLimit}</h3><table class="ranking-table"><tr><th>位</th><th>高校</th><th>名</th><th>点</th></tr>`;
-                    let rank = 1;
-                    if (snap.empty) fullHtml += `<tr><td colspan="4">記録なし</td></tr>`;
+        // ランキング取得関数
+        async function fetchRanking(level， targetId， limitNum) {
+            const display = document.getElementById(targetId);
+            display.innerHTML = "<p>読み込み中...</p>";
+            
+            const q = query(
+                collection(db， "match_rankings")，
+                where("level"， "=="， level)，
+                orderBy("score"， "desc")，
+                limit(limitNum)
+            );
+
+            try {
+                const snap = await getDocs(q);
+                let html = `<table class="ranking-table"><tr><th>位</th><th>高校</th><th>名</th><th>点</th></tr>`;
+                let rank = 1;
+                if (snap.empty) {
+                    html += `<tr><td colspan="4">記録がまだありません</td></tr>`;
+                } else {
                     snap.forEach(doc => {
                         const d = doc.data();
-                        fullHtml += `<tr><td>${rank}</td><td>${d.school}</td><td>${d.nickname}</td><td>${d.score}</td></tr>`;
+                        html += `<tr><td>${rank}</td><td>${d.school}</td><td>${d.nickname}</td><td>${d.score}</td></tr>`;
                         rank++;
                     });
-                    fullHtml += `</table>`;
-                } catch (e) { console.error(e); }
+                }
+                display.innerHTML = html + "</table>";
+            } catch (e) {
+                console.error(e);
+                display.innerHTML = "<p>エラーが発生しました。</p>";
             }
-            targetDiv.innerHTML = fullHtml;
         }
 
-        window.onload = () => fetchRankings('home-ranking-display', 20);
-
-        window.startGame = (level) => {
+        // 確認画面を表示
+        window.showConfirm = (level) => {
             currentLevel = level;
             document.getElementById('home-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            currentPool = allElements.filter(el => el.l <= level);
-            initGrid();
-            startTimer();
+            document.getElementById('confirm-screen').style.display = 'block';
+            document.getElementById('confirm-title').textContent = `Lv.${level} TOP 20`;
+            
+            fetchRanking(level， 'confirm-ranking-display'， 20);
+
+            // スタートボタンにイベントを登録
+            document.getElementById('start-btn').onclick = () => {
+                document.getElementById('confirm-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'block';
+                currentPool = allElements.filter(el => el.l <= level);
+                initGrid();
+                startTimer();
+            };
         };
 
         function startTimer() {
+            timeLeft = 40;
             timer = setInterval(() => {
                 timeLeft -= 0.1;
-                document.getElementById('progress-bar').style.width = Math.max(0, (timeLeft / 40 * 100)) + '%';
+                document.getElementById('progress-bar').style.width = Math.max(0， (timeLeft / 40 * 100)) + '%';
                 if (timeLeft <= 0) endGame();
-            }, 100);
+            }， 100);
         }
 
         function initGrid() {
             const leftCol = document.getElementById('left-column');
             const rightCol = document.getElementById('right-column');
             leftCol.innerHTML = ''; rightCol.innerHTML = '';
-            const set = [...currentPool].sort(() => 0.5 - Math.random()).slice(0, 5);
-            const names = set.map(e => ({id:e.n, text:e.m})).sort(() => 0.5 - Math.random());
-            const symbols = set.map(e => ({id:e.n, text:e.s})).sort(() => 0.5 - Math.random());
-            names.forEach(item => leftCol.appendChild(createBtn(item, 'left')));
-            symbols.forEach(item => rightCol.appendChild(createBtn(item, 'right')));
+            const set = [...currentPool].sort(() => 0.5 - Math.random()).slice(0， 5);
+            const names = set.map(e => ({id:e.n， text:e.m})).sort(() => 0.5 - Math.random());
+            const symbols = set.map(e => ({id:e.n， text:e.s})).sort(() => 0.5 - Math.random());
+            names.forEach(item => leftCol.appendChild(createBtn(item， 'left')));
+            symbols.forEach(item => rightCol.appendChild(createBtn(item， 'right')));
         }
 
-        function createBtn(item, side) {
+        function createBtn(item， side) {
             const b = document.createElement('button');
             b.className = 'match-btn';
             b.textContent = item.text;
             b.dataset.id = item.id;
-            b.onclick = () => handleSelect(b, side);
+            b.onclick = () => handleSelect(b， side);
             return b;
         }
 
-        function handleSelect(btn, side) {
+        function handleSelect(btn， side) {
             if (btn.classList.contains('fade-out') || btn.classList.contains('error')) return;
             if (side === 'left') {
                 if (selectedLeft) selectedLeft.classList.remove('selected');
@@ -249,18 +271,21 @@
                 score += 10;
                 document.getElementById('score-display').textContent = `スコア: ${score}`;
                 l.classList.add('fade-out'); r.classList.add('fade-out');
-                setTimeout(() => replaceButtons(l, r), 1500);
+                setTimeout(() => replaceButtons(l， r)， 1500);
             } else {
                 l.classList.add('error'); r.classList.add('error');
-                setTimeout(() => { l.classList.remove('error', 'selected'); r.classList.remove('error', 'selected'); }, 500);
+                setTimeout(() => { 
+                    l.classList.remove('error'， 'selected'); 
+                    r.classList.remove('error'， 'selected'); 
+                }， 500);
             }
         }
 
-        function replaceButtons(l, r) {
+        function replaceButtons(l， r) {
             const newEl = currentPool[Math.floor(Math.random() * currentPool.length)];
             l.textContent = newEl.m; l.dataset.id = newEl.n;
             r.textContent = newEl.s; r.dataset.id = newEl.n;
-            l.classList.remove('fade-out', 'selected'); r.classList.remove('fade-out', 'selected');
+            l.classList.remove('fade-out'， 'selected'); r.classList.remove('fade-out'， 'selected');
         }
 
         function endGame() {
@@ -268,20 +293,20 @@
             document.getElementById('game-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'block';
             document.getElementById('final-score').textContent = `${score} 点`;
-            fetchRankings('result-ranking-display', 10);
+            fetchRanking(currentLevel， 'result-ranking-display'， 10);
         }
 
         window.handleRegistration = async () => {
             const school = document.getElementById('school-name').value;
             const nickname = document.getElementById('nickname').value;
-            if (!school || !nickname) return alert("入力してください");
+            if (!school || !nickname) return alert("高校名とニックネームを入力してください");
             try {
-                await addDoc(collection(db, "match_rankings"), {
-                    school, nickname, score, level: currentLevel, date: new Date()
+                await addDoc(collection(db， "match_rankings")， {
+                    school， nickname， score， level: currentLevel， date: new Date()
                 });
                 alert("登録完了！");
                 document.getElementById('registration-area').style.display = 'none';
-                fetchRankings('result-ranking-display', 10);
+                fetchRanking(currentLevel， 'result-ranking-display'， 10);
             } catch (e) { alert("エラーが発生しました。"); }
         };
     </script>
