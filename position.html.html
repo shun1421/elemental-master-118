@@ -18,7 +18,7 @@
         }
 
         body {
-            font-family: 'Helvetica Neue'， Arial， sans-serif;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
             display: flex;
@@ -26,14 +26,16 @@
             align-items: center;
         }
 
-        #home-screen， #game-screen， #result-screen {
+        #home-screen, #game-screen, #result-screen {
             display: none;
             width: 100%;
             max-width: 950px;
             padding: 20px;
+            box-sizing: border-box;
             text-align: center;
         }
 
+        /* 初期表示設定 */
         #home-screen { display: block; }
 
         .periodic-wrapper {
@@ -82,7 +84,7 @@
         }
 
         @keyframes blink {
-            0%， 100% { background: #fff; }
+            0%, 100% { background: #fff; }
             50% { background: #ffeb3b; }
         }
 
@@ -101,13 +103,13 @@
             border: 2px solid var(--btn-border);
             border-bottom: 4px solid var(--btn-border);
             border-radius: 12px;
-            padding: 12px 20px;
+            padding: 15px 20px;
             margin: 10px auto;
             cursor: pointer;
             font-size: 18px;
             font-weight: bold;
             transition: all 0.1s;
-            width: 80%;
+            width: 90%;
             display: block;
             text-decoration: none;
             color: var(--text-color);
@@ -127,7 +129,6 @@
         <button class="btn" onclick="startGame(1)">Lv.1：基本20元素</button>
         <button class="btn" onclick="startGame(2)">Lv.2：受験頻出</button>
         <button class="btn" onclick="startGame(3)">Lv.3：全118元素</button>
-        
         <button class="btn" onclick="location.href='index.html'" style="border-color: #ccc; margin-top: 30px;">ポータルに戻る</button>
     </div>
 
@@ -141,23 +142,27 @@
         <h2>リザルト</h2>
         <div class="periodic-wrapper" id="result-table-grid"></div>
         <p id="final-stats" style="font-size: 20px; font-weight: bold;"></p>
-        
         <button class="btn" onclick="location.reload()" style="background: var(--primary-color); color: white; border:none;">もう一度遊ぶ</button>
         <button class="btn" onclick="location.href='index.html'">ポータルに戻る</button>
     </div>
 
     <script>
-        // 全118元素データ（match.htmlと同じ構造で管理）
-        const elements = [
-            {n:1,s:"H",m:"水素",l:1,c:1,r:1},{n:2,s:"He",m:"ヘリウム",l:1,c:18,r:1},
-            {n:3,s:"Li",m:"リチウム",l:1,c:1,r:2},{n:4,s:"Be",m:"ベリリウム",l:1,c:2,r:2},{n:5,s:"B",m:"ホウ素",l:1,c:13,r:2},{n:6,s:"C",m:"炭素",l:1,c:14,r:2},{n:7,s:"N",m:"窒素",l:1,c:15,r:2},{n:8,s:"O",m:"酸素",l:1,c:16,r:2},{n:9,s:"F",m:"フッ素",l:1,c:17,r:2},{n:10,s:"Ne",m:"ネオン",l:1,c:18,r:2},
-            {n:11,s:"Na",m:"ナトリウム",l:1,c:1,r:3},{n:12,s:"Mg",m:"マグネシウム",l:1,c:2,r:3},{n:13,s:"Al",m:"アルミニウム",l:1,c:13,r:3},{n:14,s:"Si",m:"ケイ素",l:1,c:14,r:3},{n:15,s:"P",m:"リン",l:1,c:15,r:3},{n:16,s:"S",m:"硫黄",l:1,c:16,r:3},{n:17,s:"Cl",m:"塩素",l:1,c:17,r:3},{n:18,s:"Ar",m:"アルゴン",l:1,c:18,r:3},
-            {n:19,s:"K",m:"カリウム",l:1,c:1,r:4},{n:20,s:"Ca",m:"カルシウム",l:1,c:2,r:4},
-            // 受験頻出 (Lv2)
-            {n:25,s:"Mn",m:"マンガン",l:2,c:7,r:4},{n:26,s:"Fe",m:"鉄",l:2,c:8,r:4},{n:29,s:"Cu",m:"銅",l:2,c:11,r:4},{n:30,s:"Zn",m:"亜鉛",l:2,c:12,r:4},{n:35,s:"Br",m:"臭素",l:2,c:17,r:4},{n:47,s:"Ag",m:"銀",l:2,c:11,r:5},{n:53,s:"I",m:"ヨウ素",l:2,c:17,r:5},{n:56,s:"Ba",m:"バリウム",l:2,c:2,r:6},{n:80,s:"Hg",m:"水銀",l:2,c:12,r:6},{n:82,s:"Pb",m:"鉛",l:2,c:14,r:6},
-            // 全118元素 (Lv3) 抜粋（実際には全座標を記載）
-            {n:57,s:"La",m:"ランタン",l:3,c:4,r:9},{n:89,s:"Ac",m:"アクチニウム",l:3,c:4,r:10},{n:118,s:"Og",m:"オガネソン",l:3,c:18,r:7}
+        // 全118元素の座標・レベルデータ
+        const rawData = [
+            "H,1,1,1,1","He,2,18,1,1","Li,3,1,2,1","Be,4,2,2,1","B,5,13,2,1","C,6,14,2,1","N,7,15,2,1","O,8,16,2,1","F,9,17,2,1","Ne,10,18,2,1",
+            "Na,11,1,3,1","Mg,12,2,3,1","Al,13,13,3,1","Si,14,14,3,1","P,15,15,3,1","S,16,16,3,1","Cl,17,17,3,1","Ar,18,18,3,1",
+            "K,19,1,4,1","Ca,20,2,4,1","Sc,21,3,4,3","Ti,22,4,4,3","V,23,5,4,3","Cr,24,6,4,2","Mn,25,7,4,2","Fe,26,8,4,2","Co,27,9,4,2","Ni,28,10,4,2","Cu,29,11,4,2","Zn,30,12,4,2","Ga,31,13,4,3","Ge,32,14,4,3","As,33,15,4,3","Se,34,16,4,3","Br,35,17,4,2","Kr,36,18,4,3",
+            "Rb,37,1,5,3","Sr,38,2,5,3","Y,39,3,5,3","Zr,40,4,5,3","Nb,41,5,5,3","Mo,42,6,5,3","Tc,43,7,5,3","Ru,44,8,5,3","Rh,45,9,5,3","Pd,46,10,5,3","Ag,47,11,5,2","Cd,48,12,5,3","In,49,13,5,3","Sn,50,14,5,2","Sb,51,15,5,3","Te,52,16,5,3","I,53,17,5,2","Xe,54,18,5,3",
+            "Cs,55,1,6,3","Ba,56,2,6,2","La,57,4,9,3","Ce,58,5,9,3","Pr,59,6,9,3","Nd,60,7,9,3","Pm,61,8,9,3","Sm,62,9,9,3","Eu,63,10,9,3","Gd,64,11,9,3","Tb,65,12,9,3","Dy,66,13,9,3","Ho,67,14,9,3","Er,68,15,9,3","Tm,69,16,9,3","Yb,70,17,9,3","Lu,71,18,9,3",
+            "Hf,72,4,6,3","Ta,73,5,6,3","W,74,6,6,3","Re,75,7,6,3","Os,76,8,6,3","Ir,77,9,6,3","Pt,78,10,6,2","Au,79,11,6,2","Hg,80,12,6,2","Tl,81,13,6,3","Pb,82,14,6,2","Bi,83,15,6,3","Po,84,16,6,3","At,85,17,6,3","Rn,86,18,6,3",
+            "Fr,87,1,7,3","Ra,88,2,7,3","Ac,89,4,10,3","Th,90,5,10,3","Pa,91,6,10,3","U,92,7,10,3","Np,93,8,10,3","Pu,94,9,10,3","Am,95,10,10,3","Cm,96,11,10,3","Bk,97,12,10,3","Cf,98,13,10,3","Es,99,14,10,3","Fm,100,15,10,3","Md,101,16,10,3","No,102,17,10,3","Lr,103,18,10,3",
+            "Rf,104,4,7,3","Db,105,5,7,3","Sg,106,6,7,3","Bh,107,7,7,3","Hs,108,8,7,3","Mt,109,9,7,3","Ds,110,10,7,3","Rg,111,11,7,3","Cn,112,12,7,3","Nh,113,13,7,3","Fl,114,14,7,3","Mc,115,15,7,3","Lv,116,16,7,3","Ts,117,17,7,3","Og,118,18,7,3"
         ];
+
+        const elements = rawData.map(d => {
+            const [s, n, c, r, l] = d.split(',');
+            return { s, n: parseInt(n), c: parseInt(c), r: parseInt(r), l: parseInt(l) };
+        });
 
         let currentPool = [];
         let questionIndex = 0;
@@ -179,23 +184,30 @@
         function createTableStructure(containerId) {
             const grid = document.getElementById(containerId);
             grid.innerHTML = '';
-            grid.appendChild(createDiv('label'， ''));
-            for (let c = 1; c <= 18; c++) grid.appendChild(createDiv('label'， c));
+            // 族番号ラベル
+            grid.appendChild(createDiv('label', ''));
+            for (let c = 1; c <= 18; c++) grid.appendChild(createDiv('label', c));
 
+            // メイン周期表
             for (let r = 1; r <= 7; r++) {
-                grid.appendChild(createDiv('label'， r));
-                for (let c = 1; c <= 18; c++) grid.appendChild(createCell(containerId， c， r));
+                grid.appendChild(createDiv('label', r));
+                for (let c = 1; c <= 18; c++) grid.appendChild(createCell(containerId, c, r));
             }
-            grid.appendChild(createDiv('cell spacer'， ''));
-            const labels = ["*"， "**"];
+            // 下部スペーサー
+            const sp = document.createElement('div');
+            sp.className = 'cell spacer';
+            grid.appendChild(sp);
+
+            // ランタノイド・アクチノイド
+            const labels = ["*", "**"];
             for (let r = 9; r <= 10; r++) {
-                grid.appendChild(createDiv('label'， labels[r-9]));
-                for (let c = 1; c <= 3; c++) grid.appendChild(createDiv('cell empty'， ''));
-                for (let c = 4; c <= 18; c++) grid.appendChild(createCell(containerId， c， r));
+                grid.appendChild(createDiv('label', labels[r-9]));
+                for (let c = 1; c <= 3; c++) grid.appendChild(createDiv('cell empty', ''));
+                for (let c = 4; c <= 18; c++) grid.appendChild(createCell(containerId, c, r));
             }
         }
 
-        function createCell(containerId， c， r) {
+        function createCell(containerId, c, r) {
             const elAt = elements.find(e => e.c === c && e.r === r);
             const cell = document.createElement('div');
             cell.id = `${containerId}-${c}-${r}`;
@@ -203,7 +215,7 @@
             return cell;
         }
 
-        function createDiv(className， text) {
+        function createDiv(className, text) {
             const div = document.createElement('div');
             div.className = className;
             div.textContent = text;
@@ -214,8 +226,10 @@
             questionIndex++;
             if (questionIndex > 10) return showResult();
             document.getElementById('question-counter').textContent = `第 ${questionIndex} / 10 問`;
+            
             targetEl = currentPool[Math.floor(Math.random() * currentPool.length)];
             
+            // クリーンアップ
             document.querySelectorAll('.cell').forEach(c => {
                 if(!c.classList.contains('empty') && !c.classList.contains('spacer')) {
                     c.className = 'cell'; c.textContent = '';
@@ -241,13 +255,15 @@
                 b.style.width = 'auto';
                 b.style.minWidth = '80px';
                 b.textContent = el.s;
-                b.onclick = () => checkAnswer(el， b);
+                b.onclick = () => checkAnswer(el, b);
                 container.appendChild(b);
             });
         }
 
-        function checkAnswer(selected， btn) {
+        function checkAnswer(selected, btn) {
             document.querySelectorAll('#choices .btn').forEach(b => b.style.pointerEvents = 'none');
+            const cell = document.getElementById(`table-grid-${targetEl.c}-${targetEl.r}`);
+            
             if (selected.n === targetEl.n) {
                 btn.style.background = 'var(--primary-color)';
                 btn.style.color = 'white';
@@ -257,13 +273,13 @@
                 btn.style.background = 'var(--error-color)';
                 btn.style.color = 'white';
             }
-            const cell = document.getElementById(`table-grid-${targetEl.c}-${targetEl.r}`);
+            
             if(cell) {
                 cell.textContent = targetEl.s;
                 cell.classList.remove('target');
                 cell.classList.add('correct-fill');
             }
-            setTimeout(nextQuestion， 1500);
+            setTimeout(nextQuestion, 1500);
         }
 
         function showResult() {
