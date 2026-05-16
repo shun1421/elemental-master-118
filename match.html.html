@@ -151,6 +151,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        // ↓ 追加
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDLK0eDVAMdb-pMu3j0CphI_GQSCWN-E_U",
@@ -164,6 +166,9 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        // ↓ 追加
+        const auth = getAuth(app);
+        signInAnonymously(auth).catch(e => console.error("ログインエラー:", e));
 
         const allElements = [
             {n:1,s:"H",m:"水素",l:1},{n:2,s:"He",m:"ヘリウム",l:1},{n:3,s:"Li",m:"リチウム",l:1},{n:4,s:"Be",m:"ベリリウム",l:1},{n:5,s:"B",m:"ホウ素",l:1},{n:6,s:"C",m:"炭素",l:1},{n:7,s:"N",m:"窒素",l:1},{n:8,s:"O",m:"酸素",l:1},{n:9,s:"F",m:"フッ素",l:1},{n:10,s:"Ne",m:"ネオン",l:1},{n:11,s:"Na",m:"ナトリウム",l:1},{n:12,s:"Mg",m:"マグネシウム",l:1},{n:13,s:"Al",m:"アルミニウム",l:1},{n:14,s:"Si",m:"ケイ素",l:1},{n:15,s:"P",m:"リン",l:1},{n:16,s:"S",m:"硫黄",l:1},{n:17,s:"Cl",m:"塩素",l:1},{n:18,s:"Ar",m:"アルゴン",l:1},{n:19,s:"K",m:"カリウム",l:1},{n:20,s:"Ca",m:"カルシウム",l:1},
@@ -274,10 +279,8 @@
                 document.getElementById('score-display').textContent = `スコア: ${score}`;
                 l.classList.add('fade-out'); r.classList.add('fade-out');
                 
-                // --- 修正箇所：1.2秒待ってから「枠が空の状態」で補充を判断する ---
                 setTimeout(() => {
                     l.remove(); r.remove();
-                    // さらに0.1秒だけ待ってから補充することで、確実に空き地を計算させる
                     setTimeout(() => replenish(), 100);
                 }, 1200);
             } else {
